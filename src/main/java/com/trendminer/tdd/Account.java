@@ -10,7 +10,6 @@ public class Account {
     private String name;
     private String userID;
     private String address;
-    private int money;
     private List<BankTransaction> transactions = new ArrayList<BankTransaction>();
 
     public Account(String name, String userId, String userAddress) {
@@ -32,24 +31,17 @@ public class Account {
     }
 
     public int getMoney() {
-        return money;
-    }
-
-    public void setMoney(int money) {
-        this.money = money;
+        final int[] money = {0};
+        transactions.stream().forEach(t -> money[0] = t.processTransaction(money[0]));
+        return money[0];
     }
 
     public void addMoney(int money) {
-        transactions.add(new BankTransaction(money));
-        this.money += money;
+        transactions.add(new AddMoneyBankTransaction(money));
     }
 
     public List<BankTransaction> getTransactions() {
         return transactions;
-    }
-
-    public void setTransactions(List<BankTransaction> transactions) {
-        this.transactions = transactions;
     }
 
     @Override
