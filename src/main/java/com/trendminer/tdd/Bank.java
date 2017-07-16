@@ -22,6 +22,13 @@ public class Bank {
         account.addMoney(money);
     }
 
+    public void substractMoney(int money, String userID) {
+        Account account = accounts.get(userID);
+        if (account == null)
+            throw new AccountNotFoundException();
+        account.substractMoney(money);
+    }
+
     public int checkTotalMoney(String userID) {
         Account account = accounts.get(userID);
         return account.getMoney();

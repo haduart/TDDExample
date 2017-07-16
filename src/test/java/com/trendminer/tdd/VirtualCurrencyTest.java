@@ -97,6 +97,16 @@ public class VirtualCurrencyTest {
         thenCheckTransactionsSecondAccount();
     }
 
+    @Test
+    public void substractMoneyInMyAccount() {
+        whenCreatingAnAccount();
+
+        bank.insertMoney(HUNDRED_EUROS, userID);
+        bank.substractMoney(20, userID);
+
+        thenCheckTotalMoney(80);
+    }
+
     private void thenCheckTotalMoney(String userID, int ammount) {
         assertEquals(bank.checkTotalMoney(userID), ammount);
     }
@@ -107,16 +117,16 @@ public class VirtualCurrencyTest {
 
     private void thenCheckTransactionsSecondAccount() {
         List<BankTransaction> secondUserTransactions = bank.getTransactions(secondUserID);
-        assertEquals(1, secondUserTransactions.size());
-        assertEquals(HUNDRED_EUROS, secondUserTransactions.get(0).getAmount());
+        assertEquals(2, secondUserTransactions.size());
+        assertEquals(HUNDRED_EUROS, secondUserTransactions.get(1).getAmount());
     }
 
     private void thenCheckTransactionsFirstAccount() {
         List<BankTransaction> transactions = bank.getTransactions(userID);
 
-        assertEquals(2, transactions.size());
-        assertEquals(HUNDRED_EUROS, transactions.get(0).getAmount());
+        assertEquals(3, transactions.size());
         assertEquals(HUNDRED_EUROS, transactions.get(1).getAmount());
+        assertEquals(HUNDRED_EUROS, transactions.get(2).getAmount());
     }
 
     private Account whenCreatingASecondAccount() {

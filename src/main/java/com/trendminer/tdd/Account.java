@@ -16,6 +16,7 @@ public class Account {
         this.name = name;
         this.userID = userId;
         this.address = userAddress;
+        transactions.add(new InitialMoneyBankTransaction());
     }
 
     public String getName() {
@@ -38,6 +39,10 @@ public class Account {
 
     public void addMoney(int money) {
         transactions.add(new AddMoneyBankTransaction(money));
+    }
+
+    public void substractMoney(int money) {
+        transactions.add(new SubstractMoneyBankTransaction(money));
     }
 
     public List<BankTransaction> getTransactions() {

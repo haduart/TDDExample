@@ -5,12 +5,11 @@ import java.util.Date;
 /**
  * Created by haduart on 14/07/2017.
  */
-public class AddMoneyBankTransaction implements BankTransaction {
+public class SubstractMoneyBankTransaction implements BankTransaction {
+    private Date ts;
     private int amount;
 
-    private Date ts;
-
-    public AddMoneyBankTransaction(int amount) {
+    public SubstractMoneyBankTransaction(int amount) {
         this.ts = new Date();
         this.amount = amount;
     }
@@ -25,6 +24,6 @@ public class AddMoneyBankTransaction implements BankTransaction {
     }
 
     public int processTransaction(int previousAmount) {
-        return previousAmount + amount;
+        return previousAmount - amount;
     }
 }
