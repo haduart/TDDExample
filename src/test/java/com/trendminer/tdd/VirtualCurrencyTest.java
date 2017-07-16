@@ -11,11 +11,16 @@ import static org.junit.Assert.assertEquals;
  * Created by haduart on 14/07/2017.
  */
 public class VirtualCurrencyTest {
+    final int HUNDRED_EUROS = 100;
 
     Bank bank = new Bank();
     String userID;
+    String secondUserID;
     String name;
     String userAddress;
+
+    Account firstAccount;
+    Account secondAccount;
 
     @Before
     public void setUp() throws Exception {
@@ -26,86 +31,118 @@ public class VirtualCurrencyTest {
 
     @Test
     public void createAccountInBank() {
-        Account eduAccount = bank.createAccount(name, userID, userAddress);
+        Account account = whenCreatingAnAccount();
 
-        assertEquals(name, eduAccount.getName());
-        assertEquals(userID, eduAccount.getUserID());
-        assertEquals(userAddress, eduAccount.getAddress());
+        thenAccountIsCreated(account);
     }
 
     @Test
     public void insertMoneyInMyAccount() {
-        Account eduAccount = bank.createAccount(name, userID, userAddress);
+        whenCreatingAnAccount();
 
-        bank.insertMoney(100, eduAccount.getUserID());
+        whenInsertingMoney(HUNDRED_EUROS);
 
-        assertEquals(bank.checkTotalMoney(eduAccount.getUserID()), 100);
+        thenCheckTotalMoney(HUNDRED_EUROS);
     }
 
     @Test
     public void insertMultipleTransactionsInMyAccount() {
-        Account eduAccount = bank.createAccount(name, userID, userAddress);
+        whenCreatingAnAccount();
 
-        final String userID = eduAccount.getUserID();
-        bank.insertMoney(100, userID);
-        bank.insertMoney(200, userID);
+        whenInsertingMoney(HUNDRED_EUROS);
+        whenInsertingMoney(2 * HUNDRED_EUROS);
 
-        assertEquals(bank.checkTotalMoney(userID), 300);
+        thenCheckTotalMoney(3 * HUNDRED_EUROS);
     }
 
     @Test
     public void insertingMoneyFromMultipleAccounts() {
-        Account eduAccount = bank.createAccount(name, userID, userAddress);
-        Account robertoAccount = bank.createAccount("Roberto", "ES1111", "San Cagat 5, Barcelona, Spain");
+        whenCreatingAnAccount();
+        whenCreatingASecondAccount();
 
-        bank.insertMoney(100, eduAccount.getUserID());
-        bank.insertMoney(100, robertoAccount.getUserID());
+        whenInsertingMoney(HUNDRED_EUROS);
+        whenInsertingMoneySecondAccount(HUNDRED_EUROS);
 
-        assertEquals(bank.checkTotalMoney(eduAccount.getUserID()), 100);
-        assertEquals(bank.checkTotalMoney(robertoAccount.getUserID()), 100);
+        thenCheckTotalMoney(HUNDRED_EUROS);
+        thenCheckTotalMoney(secondUserID, HUNDRED_EUROS);
     }
 
     @Test(expected = AccountNotFoundException.class)
     public void notPossibleToInsertMoneyToUnknowAccount() {
         final String unknowUserID = "ES6666";
-        bank.insertMoney(100, unknowUserID);
+        bank.insertMoney(HUNDRED_EUROS, unknowUserID);
     }
 
     @Test
     public void checkTransactionsFromUser() {
-        Account eduAccount = bank.createAccount(name, userID, userAddress);
+        whenCreatingAnAccount();
 
-        final String userID = eduAccount.getUserID();
-        bank.insertMoney(100, userID);
-        bank.insertMoney(200, userID);
+        whenInsertingMoney(HUNDRED_EUROS);
+        whenInsertingMoney(HUNDRED_EUROS);
 
-        List<BankTransaction> transactions = bank.getTransactions(userID);
-
-        assertEquals(2, transactions.size());
-        assertEquals(100, transactions.get(0).getAmmount());
-        assertEquals(200, transactions.get(1).getAmmount());
+        thenCheckTransactionsFirstAccount();
     }
 
     @Test
     public void checkTransactionsFromMultipleUsers() {
-        Account eduAccount = bank.createAccount(name, userID, userAddress);
-        Account robertoAccount = bank.createAccount("Roberto", "ES1111", "San Cagat 5, Barcelona, Spain");
+        whenCreatingAnAccount();
+        whenCreatingASecondAccount();
 
-        bank.insertMoney(100, eduAccount.getUserID());
-        bank.insertMoney(200, eduAccount.getUserID());
-        bank.insertMoney(50, robertoAccount.getUserID());
+        whenInsertingMoney(HUNDRED_EUROS);
+        whenInsertingMoney(HUNDRED_EUROS);
+        whenInsertingMoneySecondAccount(HUNDRED_EUROS);
 
-        List<BankTransaction> eduTransactions = bank.getTransactions(userID);
+        thenCheckTransactionsFirstAccount();
 
-        assertEquals(2, eduTransactions.size());
-        assertEquals(100, eduTransactions.get(0).getAmmount());
-        assertEquals(200, eduTransactions.get(1).getAmmount());
-
-        List<BankTransaction> robertoTransactions = bank.getTransactions(robertoAccount.getUserID());
-        assertEquals(1, robertoTransactions.size());
-        assertEquals(50, robertoTransactions.get(0).getAmmount());
+        thenCheckTransactionsSecondAccount();
     }
 
+    private void thenCheckTotalMoney(String userID, int ammount) {
+        assertEquals(bank.checkTotalMoney(userID), ammount);
+    }
+
+    private void thenCheckTotalMoney(int ammount) {
+        assertEquals(bank.checkTotalMoney(userID), ammount);
+    }
+
+    private void thenCheckTransactionsSecondAccount() {
+        List<BankTransaction> secondUserTransactions = bank.getTransactions(secondUserID);
+        assertEquals(1, secondUserTransactions.size());
+        assertEquals(HUNDRED_EUROS, secondUserTransactions.get(0).getAmmount());
+    }
+
+    private void thenCheckTransactionsFirstAccount() {
+        List<BankTransaction> transactions = bank.getTransactions(userID);
+
+        assertEquals(2, transactions.size());
+        assertEquals(HUNDRED_EUROS, transactions.get(0).getAmmount());
+        assertEquals(HUNDRED_EUROS, transactions.get(1).getAmmount());
+    }
+
+    private Account whenCreatingASecondAccount() {
+        secondAccount = bank.createAccount("Roberto", "ES1111", "San Cagat 5, Barcelona, Spain");
+        secondUserID = secondAccount.getUserID();
+        return secondAccount;
+    }
+
+    private void thenAccountIsCreated(Account account) {
+        assertEquals(name, account.getName());
+        assertEquals(userID, account.getUserID());
+        assertEquals(userAddress, account.getAddress());
+    }
+
+    private void whenInsertingMoneySecondAccount(int amount) {
+        bank.insertMoney(amount, secondUserID);
+    }
+
+    private void whenInsertingMoney(int amount) {
+        bank.insertMoney(amount, userID);
+    }
+
+    private Account whenCreatingAnAccount() {
+        firstAccount =  bank.createAccount(name, userID, userAddress);
+        return firstAccount;
+    }
 
     private int generateRandomValue() {
         return (int) (Math.random() * 100);
